@@ -7,7 +7,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {useDispatch} from "react-redux"
 import {creation} from "@/features/tokenSlice.js"
-
+import {set} from "@/features/userSlice.js"
 
 export function LoginForm({
   className,
@@ -31,7 +31,9 @@ export function LoginForm({
     try{
       const response=await login(formData);
       console.log(response);
+      const username=response.data.data.username;
       const token=response.data.data.token;
+      dispatch(set(username))
       dispatch(creation(token));
       navigate("/dashboard");
     }

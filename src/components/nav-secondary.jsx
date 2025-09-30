@@ -38,7 +38,7 @@ export function NavSecondary({
             <SidebarMenu>
               {items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild onClick={handleLogOut}>
+                    <SidebarMenuButton className="cursor-pointer" asChild onClick={handleLogOut}>
                       <div>
                         <item.icon/>
                         <span>{item.title}</span>

@@ -2,8 +2,13 @@ import SockJS from "sockjs-client"
 import { Client } from "@stomp/stompjs"
 
 let stompClient=null;
+let subscribers=[];
 
 export function startConnection(){
+    if (stompClient && stompClient.connected) {
+        console.log("Already connected")
+        return
+    }
     const socket= new SockJS("http://localhost:8080/ws-chat")
     stompClient=new Client({
         webSocketFactory:()=>socket,
@@ -13,7 +18,7 @@ export function startConnection(){
         console.log("Connected with websocket server");
         stompClient.subscribe("/chatroom/messages",(message)=>{
             const chatMessage=JSON.parse(message.body);
-            console.log(chatMessage);
+            subscribers.forEach((cb)=>cb(chatMessage));
         });
     }
     stompClient.onStompError=(frame)=>{
@@ -22,11 +27,11 @@ export function startConnection(){
     stompClient.activate();
 }
 
-export function sendMessage(content){
+export function sendMessage(content,file,username){
     if(stompClient!=null && stompClient.connected){
         stompClient.publish({
             destination:"/app/chat",
-            body:JSON.stringify({content})
+            body:JSON.stringify({content,file,username})
         });
     }
     else{
@@ -37,6 +42,13 @@ export function sendMessage(content){
 export function disconnect(){
     if(stompClient!=null){
         stompClient.deactivate();
-        console.log("Disconnect")
+        console.log("Disconnect");
+    }
+}
+
+export function subscribe(callback){
+    subscribers.push(callback);
+    return ()=>{
+        subscribers=subscribers.filter((cb)=>cb!==callback);
     }
 }
